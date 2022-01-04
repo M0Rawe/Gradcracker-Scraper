@@ -60,26 +60,4 @@ if __name__ ==  '__main__':
     while(True):
         job_search()
         time.sleep(60)
-
-        with open(f'Job files/{index}.txt','w') as f:
-            f.write(f'Company Name:   {company}')
-            f.write(f'Title:          {title}')
-            f.write(f'Location/s:     {location}')
-            f.write(f'Length:         {length}')
-            f.write(f'Deadline:      {deadline}')
-            f.write(f'Link:           {link}')
-
-        print(f'''
-           Company Name:   {company}
-           Title:          {title}
-           Location/s:     {location}
-           Length:         {length}
-           Deadline:      {deadline}
-           Link:           {link}
-        ''')
-
-
-if __name__ ==  '__main__':
-    while True:
-        job_search()
-        time.
+        
