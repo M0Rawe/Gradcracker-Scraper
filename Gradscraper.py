@@ -2,19 +2,20 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 import time
+import smtplib
+import ssl
 
-#testchangegit
-#idk what i am doing
 port = 465  # For SSL
 smtp_server = "smtp.gmail.com"
 sender_email = "gradscraper@gmail.com"
 receiver_email = "michaelorawe@btinternet.com"
 #password = input("What is the password?")#gradscraper33
 password = "gradscraper33"
-email_text = ''
 joblist=[]
-def job_search():
-    global joblist
+comparison = pd.read_csv('ComparisonFile.csv')
+flag=True
+while(True):
+
     html_text = requests.get("https://www.gradcracker.com/search/electronic-electrical/engineering-work-placements-internships?order=dateAdded&duration=Summer").text
     soup = BeautifulSoup(html_text,'lxml')
     jobs = soup.find_all('div',class_='tw-relative tw-mb-4 tw-border-2 tw-border-gray-200 tw-rounded')
@@ -27,6 +28,7 @@ def job_search():
 
         item = job.find_all('li',class_='tw-text-xs tw-font-semibold')
         info = []
+
         for individual in item:
             info.append(individual.text)
 
@@ -35,29 +37,31 @@ def job_search():
         length = info[-2]
         deadline=info[-1].split(':',1)[1]
 
+        if flag:
+            joblist.append([company,title,salary,location,length,deadline,link])
 
-        #print(f'''
-           #Company Name:   {company}
-           #Title:          {title}
-           #Location/s:     {location}
-           #Length:         {length}
-           #Deadline:      {deadline}
-           #Link:           {link}
-        #''')
-
-        joblist.append([company,title,salary,location,length,deadline,link])
-        #print(joblist)
-
+    flag=False
     job_list=pd.DataFrame(joblist)
     job_list.set_axis(['Company','Title','Salary','Location','Length','Deadline','Link'],axis=1,inplace=True)
     job_list.to_csv('joblist.csv')
-    comparison = pd.read_csv('ComparisonFile.csv')
     new_jobs = pd.merge(job_list,comparison,on=['Company','Title','Salary','Location','Length','Deadline','Link'],how="outer",indicator=True).query('_merge=="left_only"')
     new_jobs.to_csv('new_jobs.csv')
     comparison=job_list
+    comparison.to_csv("ComparisonFile.csv")
 
-if __name__ ==  '__main__':
-    while(True):
-        job_search()
-        time.sleep(60)
-        
+    for index,row in new_jobs.iterrows():
+        new_company,new_title,new_salary,new_location,new_length,new_deadline,new_link=row['Company'],row['Title'],row['Salary'],row['Location'],row['Length'],row['Deadline'],row['Link']
+        message=(f'''
+        Company Name:   {new_company}
+        Title:          {new_title}
+        Salary:         {new_salary}
+        Location/s:     {new_location}
+        Length:         {new_length}
+        Deadline:       {new_deadline}
+        Link:           {new_link}
+        ''')
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, message.encode("utf8"))
+    time.sleep(30)
