@@ -8,16 +8,16 @@ import ssl
 port = 465  # For SSL
 smtp_server = "smtp.gmail.com"
 sender_email = "gradscraper@gmail.com"
-receiver_email = "michaelorawe@btinternet.com"
+receiver_email = "morawe03@qub.ac.uk"
 # password = input("What is the password?")#gradscraper33
 password = "gradscraper33"
-joblist = []
-comparison = pd.read_csv('ComparisonFile.csv')
+comparisonlist=[]
+#comparison = pd.read_csv('ComparisonFile.csv')
 flag = True
 time_spent = 0
 
 while (True):
-
+    joblist = []
     html_text = requests.get(
         "https://www.gradcracker.com/search/electronic-electrical/engineering-work-placements-internships?order=dateAdded&duration=Summer").text
     soup = BeautifulSoup(html_text, 'lxml')
@@ -40,11 +40,13 @@ while (True):
         location = info[1]
         length = info[-2]
         deadline = info[-1].split(':', 1)[1]
-
+        joblist.append([company, title, salary, location, length, deadline, link])
         if flag:
-            joblist.append([company, title, salary, location, length, deadline, link])
+            comparisonlist.append([company, title, salary, location, length, deadline, link])
 
     flag = False
+    comparison=pd.DataFrame(comparisonlist)
+    comparison.set_axis(['Company', 'Title', 'Salary', 'Location', 'Length', 'Deadline', 'Link'], axis=1, inplace=True)
     job_list = pd.DataFrame(joblist)
     job_list.set_axis(['Company', 'Title', 'Salary', 'Location', 'Length', 'Deadline', 'Link'], axis=1, inplace=True)
     job_list.to_csv('joblist.csv')
@@ -73,10 +75,10 @@ while (True):
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(sender_email, password)
             server.sendmail(sender_email, receiver_email, message.encode("utf8"))
+        print(message)
     print(f"Time spent searching is {time_spent} seconds")
     print(f"There are {len(new_jobs.index)} new jobs found!")
     print()
     time_spent+=30
     time.sleep(30)
-
-   
+ 
