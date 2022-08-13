@@ -7,10 +7,10 @@ import ssl
 
 port = 465  # For SSL
 smtp_server = "smtp.gmail.com"
-sender_email = "gradscraper@gmail.com"
-receiver_email = "morawe03@qub.ac.uk"
-# password = input("What is the password?")#gradscraper33
-password = "gradscraper33"
+sender_email = input("Enter sender email:")
+password = input("Enter password for sender email:")
+receiver_email = input("Enter recpipient email:")
+
 comparisonlist=[]
 #comparison = pd.read_csv('ComparisonFile.csv')
 flag = True
